@@ -1,0 +1,62 @@
+### CMD: python --version
+Python 3.12.10
+### EXIT: 0
+
+### CMD: python make_sample.py
+Created sample/orders.csv with 4 fictional data records.
+Existing files are never replaced. Run this setup only once in a new lesson folder.
+### EXIT: 0
+
+### CMD: python -c "from pathlib import Path; print(Path('sample/orders.csv').read_text(encoding='utf-8'), end='')"
+Order ID,Item,Phone,Reference,Total
+00104,Tea,0555000001,1234567890123456,129.50
+00215,Pen,0555000002,1234567890123457,64.00
+00331,Book,0555000003,1234567890123458,250.75
+00440,Cup,0555000004,1234567890123459,19.99
+### EXIT: 0
+
+### CMD: python excelcsv.py sample/orders.csv
+Two numeric-text risks to check before Excel import
+File: sample/orders.csv
+Data records checked: 4
+
+Column: Order ID
+  4 leading-zero value(s), like 00104
+Column: Phone
+  4 leading-zero value(s), like 0555000001
+Column: Reference
+  4 value(s) have 16+ digits, like 1234567890123456
+
+These are risk flags, not predictions for your Excel settings.
+Not checked: dates, scientific notation, formulas, encoding beyond UTF-8,
+or every other automatic conversion. No-hit output is not a safety pass.
+Only the CSV was read. Import identifiers as text if you must keep digits.
+### EXIT: 0
+
+### CMD: python -m unittest -v
+test_blank_header_rejected (test_excelcsv.Checks.test_blank_header_rejected) ... ok
+test_bom_accepted (test_excelcsv.Checks.test_bom_accepted) ... ok
+test_both_risks_counted (test_excelcsv.Checks.test_both_risks_counted) ... ok
+test_duplicate_header_rejected (test_excelcsv.Checks.test_duplicate_header_rejected) ... ok
+test_empty_file_rejected (test_excelcsv.Checks.test_empty_file_rejected) ... ok
+test_extra_fields_rejected (test_excelcsv.Checks.test_extra_fields_rejected) ... ok
+test_header_only (test_excelcsv.Checks.test_header_only) ... ok
+test_invalid_utf8_rejected (test_excelcsv.Checks.test_invalid_utf8_rejected) ... ok
+test_leading_zero (test_excelcsv.Checks.test_leading_zero) ... ok
+test_long_boundary (test_excelcsv.Checks.test_long_boundary) ... ok
+test_missing_fields_rejected (test_excelcsv.Checks.test_missing_fields_rejected) ... ok
+test_missing_file (test_excelcsv.Checks.test_missing_file) ... ok
+test_no_hits_are_not_safety_pass (test_excelcsv.Checks.test_no_hits_are_not_safety_pass) ... ok
+test_quoted_multiline (test_excelcsv.Checks.test_quoted_multiline) ... ok
+test_separate_examples (test_excelcsv.Checks.test_separate_examples) ... ok
+test_setup_refuses_existing_sample (test_excelcsv.Checks.test_setup_refuses_existing_sample) ... ok
+test_source_bytes_metadata_and_directory_unchanged (test_excelcsv.Checks.test_source_bytes_metadata_and_directory_unchanged) ... ok
+test_surrounding_spaces (test_excelcsv.Checks.test_surrounding_spaces) ... ok
+test_unclosed_quote_rejected (test_excelcsv.Checks.test_unclosed_quote_rejected) ... ok
+test_usage (test_excelcsv.Checks.test_usage) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.235s
+
+OK
+### EXIT: 0
