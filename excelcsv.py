@@ -5,6 +5,27 @@ Only ASCII digit strings with leading zeros or 16+ digits are flagged.
 """
 import csv
 import sys
+import stat
+from pathlib import Path
+
+
+def safe_input(value, directory=False):
+    path = Path(value).absolute()
+    if '..' in path.parts:
+        raise OSError('Parent-traversal paths are unsupported.')
+    for part in [*reversed(path.parents), path]:
+        info = part.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, 'st_file_attributes', 0) & 0x400:
+            raise OSError('Links/reparse points are unsupported.')
+    info = path.lstat()
+    if directory:
+        if not stat.S_ISDIR(info.st_mode):
+            raise NotADirectoryError('Expected an ordinary directory.')
+    elif not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+        raise OSError('Expected an ordinary singly linked file.')
+    return path
+
+
 
 
 def ascii_digits(text):
@@ -42,7 +63,7 @@ def main(argv):
         return 2
     path = argv[1]
     try:
-        with open(path, 'r', newline='', encoding='utf-8-sig') as handle:
+        with open(safe_input(path), 'r', newline='', encoding='utf-8-sig') as handle:
             reader = csv.reader(handle, strict=True)
             header = next(reader, None)
             if not header or any(not name.strip() for name in header):
@@ -56,7 +77,7 @@ def main(argv):
                                      % (number, len(fields), len(header)))
                 rows.append(dict(zip(header, fields)))
     except OSError as error:
-        print('Cannot read file: %s (%s)' % (path, error.strerror), file=sys.stderr)
+        print('Cannot read file: %s (%s)' % (path, (error.strerror or str(error))), file=sys.stderr)
         return 2
     except (csv.Error, UnicodeError, ValueError) as error:
         print('Could not check CSV: %s' % error, file=sys.stderr)
