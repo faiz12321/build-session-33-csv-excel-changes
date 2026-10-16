@@ -1,5 +1,6 @@
 """Create a tiny fictional CSV beside this script. Never reuse a sample folder."""
 from pathlib import Path
+import stat
 
 CSV = '''Order ID,Item,Phone,Reference,Total
 00104,Tea,0555000001,1234567890123456,129.50
@@ -10,7 +11,13 @@ CSV = '''Order ID,Item,Phone,Reference,Total
 
 
 def main():
-    folder = Path(__file__).resolve().parent / 'sample'
+    folder = Path(__file__).absolute().parent / 'sample'
+    if '..' in folder.parts:
+        raise OSError('Parent-traversal paths are unsupported.')
+    for parent in reversed(folder.parents):
+        info = parent.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, 'st_file_attributes', 0) & 0x400:
+            raise OSError('Linked/reparse-point parents are unsupported.')
     try:
         folder.mkdir()  # Refuses any existing file or folder, including links.
     except FileExistsError:
